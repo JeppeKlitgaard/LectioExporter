@@ -76,3 +76,5 @@ docs/_build/
 # PyBuilder
 target/
 
+# google-python-api-client
+client_secret.json
