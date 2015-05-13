@@ -1,6 +1,8 @@
 import os
 import argparse
-from datetime import datetime
+from datetime import datetime, time
+from pprint import pprint
+import json
 
 import oauth2client
 from oauth2client import client, tools
@@ -11,9 +13,13 @@ from googleapiclient import errors
 
 from httplib2 import Http
 
-SCOPES = "https://www.googleapis.com/auth/calendar.readonly"
+SCOPES = "https://www.googleapis.com/auth/calendar"
 CLIENT_SECRET_FILE = "client_secret.json"
 APPLICATION_NAME = "LectioExporter"
+
+
+def dt2rfc3339(dt):
+    return dt.isoformat() + "Z"
 
 
 def get_credentials():
@@ -54,18 +60,43 @@ def get_credentials():
     return credentials
 
 
+def create_event(service, calendarId, summary, status, location, description,
+                 start_time, end_time):
+    """
+    Creates an event on the given calendar using given service.
+    """
+    fields = {
+        "summary": summary,
+        "status": status,
+        "location": location,
+        "description": description,
+        "start": {
+            "dateTime": dt2rfc3339(start_time)  # Google wants RFC 3339 format
+        },
+        "end": {
+            "dateTime": dt2rfc3339(end_time)
+        }
+    }
+
+    event_result = service.events().insert(calendarId=calendarId,
+                                           fields=",".join(fields.keys()),
+                                           body=fields).execute()
+
+    return event_result
+
+
 def main():
     credentials = get_credentials()
     service = build("calendar", "v3", http=credentials.authorize(Http()))
 
-    now = datetime.utcnow().isoformat() + "Z"
+    now = datetime.utcnow()
+    then = datetime(2015, 5, 13, 17, 18, 9)
 
-    try:
-        events_result = service.events().list(calendarId="jeppe@dapj.dk").execute()
-    except errors.HttpError as e:
-        print(e)
+    print(dt2rfc3339(now))
+    print(dt2rfc3339(then))
 
-    print(events_result)
+    print(create_event(service, "jeppe@dapj.dk", "Summary!!", "confirmed", "N7", "Description goes here!",
+                       now, then))
 
 
 if __name__ == "__main__":
