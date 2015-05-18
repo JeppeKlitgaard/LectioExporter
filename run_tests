@@ -1,0 +1,3 @@
+#!/bin/bash
+flake8 lectioexporter clean_school_calendar.py
+pylint lectioexporter
