@@ -1,4 +1,7 @@
 import re
+import logging
+
+LOGGING_LEVEL = logging.DEBUG
 
 SCHOOL_ID = "248"
 STUDENT_ID = "9232029391"

@@ -15,11 +15,15 @@ from googleapiclient import errors
 
 from httplib2 import Http
 
+import logging
+
 from .utilities import rfc33392dt, dt2rfc3339
 
 SCOPES = "https://www.googleapis.com/auth/calendar"
 CLIENT_SECRET_FILE = "client_secret.json"
 APPLICATION_NAME = "LectioExporter"
+
+logger = logging.getLogger("LectioExporter")
 
 
 def get_credentials():
@@ -109,7 +113,9 @@ def clear_calendar(service, calendarId, max_results=2500, min_time=None):
             break
 
     for event in events:
-        print("Delete")
+        fmt = "Deleted event with id: '{}', summary: '{}' starting: '{}'"
+        logger.info(fmt.format(event["id"], event["summary"],
+                               event["start"]["dateTime"]))
         service.events().delete(calendarId=calendarId,
                                 eventId=event["id"]).execute()
 
@@ -139,22 +145,3 @@ def create_event(service, calendarId, summary, status, location, description,
                                            body=fields).execute()
 
     return event_result
-
-
-def main():
-    credentials = get_credentials()
-    service = make_service(credentials)
-
-    now = datetime.utcnow()
-    then = datetime(2015, 5, 13, 17, 18, 9)
-
-    print(dt2rfc3339(now))
-    print(dt2rfc3339(then))
-    print(json.dumps(list_calendars(service), indent=2))
-
-    #print(create_event(service, "jeppe@dapj.dk", "Summary!!", "confirmed", "N7", "Description goes here!",
-    #                   now, then))
-
-
-if __name__ == "__main__":
-    main()
