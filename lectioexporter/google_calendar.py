@@ -2,22 +2,17 @@ import os
 import argparse
 from datetime import datetime, timedelta
 import pytz
-from time import sleep
-from pprint import pprint
-import json
 
-import oauth2client
 from oauth2client import client, tools
 from oauth2client import file as oa2c_file
 
 from googleapiclient.discovery import build
-from googleapiclient import errors
 
 from httplib2 import Http
 
 import logging
 
-from .utilities import rfc33392dt, dt2rfc3339
+from .utilities import dt2rfc3339
 
 SCOPES = "https://www.googleapis.com/auth/calendar"
 CLIENT_SECRET_FILE = "client_secret.json"
