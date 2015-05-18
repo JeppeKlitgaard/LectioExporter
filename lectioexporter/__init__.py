@@ -1,3 +1,8 @@
+"""
+Exports your lectio timetable to a Google Calendar and your
+lectio assignments to Todoist.
+"""
+
 import logging
 from .config import LOGGING_LEVEL
 

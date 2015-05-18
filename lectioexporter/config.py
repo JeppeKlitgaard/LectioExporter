@@ -1,3 +1,7 @@
+"""
+Contains configuration options and values used by LectioExporter.
+"""
+
 import re
 import logging
 

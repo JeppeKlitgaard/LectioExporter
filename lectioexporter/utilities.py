@@ -1,3 +1,7 @@
+"""
+Contains utility functions and classes used by LectioExporter.
+"""
+
 from datetime import datetime
 
 

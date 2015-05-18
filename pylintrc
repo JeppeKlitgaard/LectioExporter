@@ -13,7 +13,12 @@ disable=E1608,W1627,E1601,E1603,E1602,E1605,E1604,E1607,E1606,W1621,W1620,W1623,
     too-many-locals,
     too-many-return-statements,
     too-many-branches,
-    too-many-statements
+    too-many-statements,
+    too-many-arguments,
+# ??
+    logging-format-interpolation,
+# Oh shut up...
+    redefined-outer-name
 
 [REPORTS]
 output-format=colorized
