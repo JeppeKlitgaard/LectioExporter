@@ -1,6 +1,8 @@
 import os
 import argparse
-from datetime import datetime, time
+from datetime import datetime, timedelta
+import pytz
+from time import sleep
 from pprint import pprint
 import json
 
@@ -13,13 +15,11 @@ from googleapiclient import errors
 
 from httplib2 import Http
 
+from .utilities import rfc33392dt, dt2rfc3339
+
 SCOPES = "https://www.googleapis.com/auth/calendar"
 CLIENT_SECRET_FILE = "client_secret.json"
 APPLICATION_NAME = "LectioExporter"
-
-
-def dt2rfc3339(dt):
-    return dt.isoformat() + "Z"
 
 
 def get_credentials():
@@ -60,6 +60,62 @@ def get_credentials():
     return credentials
 
 
+def make_service(credentials):
+    """
+    Makes a ``service`` object based on ``credentials``.
+    """
+    service = build("calendar", "v3", http=credentials.authorize(Http()))
+
+    return service
+
+
+def list_calendars(service):
+    """
+    Lists all calendars connected to ``service``.
+    """
+    result = service.calendarList().list().execute()
+
+    return result
+
+
+def clear_calendar(service, calendarId, max_results=2500, min_time=None):
+    """
+    When ``min_time`` is ``None``, the ``min_time`` will be in one hour.
+    """
+    if min_time is None:
+        min_time = datetime.utcnow() + timedelta(hours=1)
+        min_time = min_time.replace(tzinfo=pytz.UTC)
+
+    events = []
+    next_page_token = ""
+    while True:
+        kwargs = {
+            "calendarId": calendarId,
+            "maxResults": max_results,
+            "timeMin": dt2rfc3339(min_time),
+            "singleEvents": "true",
+            "orderBy": "startTime"
+        }
+        if next_page_token:
+            kwargs["pageToken"] = next_page_token
+
+        events_result = service.events().list(**kwargs).execute()
+
+        events.extend(events_result["items"])
+
+        if "nextPageToken" in events_result:
+            next_page_token = events_result["nextPageToken"]
+        else:
+            break
+
+    for event in events:
+        print("Delete")
+        service.events().delete(calendarId=calendarId,
+                                eventId=event["id"]).execute()
+
+    return True
+
+
 def create_event(service, calendarId, summary, status, location, description,
                  start_time, end_time):
     """
@@ -87,16 +143,17 @@ def create_event(service, calendarId, summary, status, location, description,
 
 def main():
     credentials = get_credentials()
-    service = build("calendar", "v3", http=credentials.authorize(Http()))
+    service = make_service(credentials)
 
     now = datetime.utcnow()
     then = datetime(2015, 5, 13, 17, 18, 9)
 
     print(dt2rfc3339(now))
     print(dt2rfc3339(then))
+    print(json.dumps(list_calendars(service), indent=2))
 
-    print(create_event(service, "jeppe@dapj.dk", "Summary!!", "confirmed", "N7", "Description goes here!",
-                       now, then))
+    #print(create_event(service, "jeppe@dapj.dk", "Summary!!", "confirmed", "N7", "Description goes here!",
+    #                   now, then))
 
 
 if __name__ == "__main__":
