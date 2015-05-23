@@ -1,0 +1,4 @@
+#!/usr/bin/env python3
+
+from lectioexporter.main import main
+main()

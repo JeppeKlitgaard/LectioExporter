@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+
+from crontab import CronTab
+from distutils import spawn  # For which-like function
+
+COMMENT_ID = "LectioExporter"
+
+tab = CronTab(user=True)
+
+tab.remove_all(comment=COMMENT_ID)  # Clean old configs
+
+cmd = spawn.find_executable("export_lectio")
+
+job = tab.new(command=cmd, comment=COMMENT_ID)
+job.hour.every(3)
+
+print("Crontab set up.")

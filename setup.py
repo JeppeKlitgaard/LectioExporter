@@ -12,4 +12,5 @@ setup(name="lectioexporter",
       author="Jeppe Klitgaard",
       author_email="jeppe@dapj.dk",
       packages=["lectioexporter"],
-      scripts=[])
+      scripts=["scripts/export_lectio",
+               "scripts/configure_lectioexporter"])
