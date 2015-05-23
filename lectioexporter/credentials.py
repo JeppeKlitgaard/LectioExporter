@@ -13,7 +13,7 @@ from oauth2client import client, tools
 from oauth2client import file as oa2c_file
 
 from .utilities import make_dir_if_non_existant
-from .config import (APPLICATION_NAME, CREDENTIALS_DIR, CLIENT_SECRET_FILE,
+from .config import (APPLICATION_NAME, CONFIG_DIR, CLIENT_SECRET_FILE,
                      SCOPES)
 
 import logging
@@ -41,9 +41,9 @@ def get_google_credentials():
 
     flags = parser.parse_args()
 
-    make_dir_if_non_existant(CREDENTIALS_DIR)
+    make_dir_if_non_existant(CONFIG_DIR)
 
-    credential_path = os.path.join(CREDENTIALS_DIR,
+    credential_path = os.path.join(CONFIG_DIR,
                                    APPLICATION_NAME + ".json")
 
     store = oa2c_file.Storage(credential_path)
@@ -51,7 +51,9 @@ def get_google_credentials():
     if not credentials or credentials.invalid:
         logger.info("No valid Google credentials found, asking for new "
                     "credentials.")
-        flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
+        client_secret_path = os.path.join(CONFIG_DIR, CLIENT_SECRET_FILE)
+
+        flow = client.flow_from_clientsecrets(client_secret_path, SCOPES)
         flow.user_agent = APPLICATION_NAME
 
         credentials = tools.run_flow(flow, store, flags)
@@ -67,10 +69,10 @@ def _get_credentials(service_name, fields):
     ``fields`` should be a list of fields.
         ``'password'`` is treated as a special case.
     """
-    make_dir_if_non_existant(CREDENTIALS_DIR)
+    make_dir_if_non_existant(CONFIG_DIR)
 
     logger.debug("Fetching {} credentials".format(service_name.title()))
-    credentials_path = os.path.join(CREDENTIALS_DIR,
+    credentials_path = os.path.join(CONFIG_DIR,
                                     service_name.lower() + ".json")
 
     try:

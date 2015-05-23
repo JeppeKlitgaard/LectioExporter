@@ -10,8 +10,8 @@ import logging
 
 LOGGING_LEVEL = logging.DEBUG
 
-CREDENTIALS_DIR = os.path.abspath(os.path.join(os.path.expanduser("~"),
-                                               ".credentials"))
+CONFIG_DIR = os.path.abspath(os.path.join(os.path.expanduser("~"),
+                                          ".lectioexporter"))
 
 TIMEZONE = pytz.timezone("Europe/Copenhagen")
 
