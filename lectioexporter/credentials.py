@@ -51,15 +51,18 @@ def get_google_credentials():
     return credentials
 
 
-def get_todoist_credentials():
+def _get_credentials(service_name, fields):
     """
-    Gets username and password for Todoist if available,
+    Gets username and password if available,
     otherwise asks the user to input them.
+
+    ``fields`` should be a list of fields.
+        ``'password'`` is treated as a special case.
     """
     make_dir_if_non_existant(CREDENTIALS_DIR)
 
     credentials_path = os.path.join(CREDENTIALS_DIR,
-                                    "todoist.json")
+                                    service_name.lower() + ".json")
 
     try:
         with open(credentials_path, "r") as f:
@@ -68,15 +71,36 @@ def get_todoist_credentials():
             return credentials
 
     except FileNotFoundError:
-        user_email = input("Todoist email: ")
-        user_password = getpass("Todoist password: ")
+        credentials = {}
 
-        credentials = {
-            "email": user_email,
-            "password": user_password
-        }
+        for field in fields:
+            serv_name = service_name.title()
+
+            if field == "password":
+                value = getpass("{} password: ".format(serv_name))
+
+            else:
+                value = input("{} {}: ".format(serv_name, field))
+
+            credentials[field] = value
 
         with open(credentials_path, "w") as f:
             json.dump(credentials, f)
 
         return credentials
+
+
+def get_todoist_credentials():
+    """
+    Gets username and password for Todoist if available,
+    otherwise asks the user to input them.
+    """
+    return _get_credentials("todoist", ["email", "password"])
+
+
+def get_lectio_credentials():
+    """
+    Gets username and password for Lectio if available,
+    otherwise asks the user to input them.
+    """
+    return _get_credentials("lectio", ["username", "password"])

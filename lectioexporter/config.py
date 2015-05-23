@@ -4,6 +4,7 @@ Contains configuration options and values used by LectioExporter.
 
 import re
 import os
+import pytz
 
 import logging
 
@@ -11,6 +12,8 @@ LOGGING_LEVEL = logging.DEBUG
 
 CREDENTIALS_DIR = os.path.abspath(os.path.join(os.path.expanduser("~"),
                                                ".credentials"))
+
+TIMEZONE = pytz.timezone("Europe/Copenhagen")
 
 GOOGLE_ENABLED = False
 TODOIST_ENABLED = True
@@ -26,6 +29,7 @@ APPLICATION_NAME = "LectioExporter"
 CALENDAR_ID = "dapj.dk_oc1tppk1qrfglv9f2u6igpqetg@group.calendar.google.com"
 
 # Todoist
+PROJECT_ID = 144366012
 
 # Lectio
 SCHOOL_ID = "248"

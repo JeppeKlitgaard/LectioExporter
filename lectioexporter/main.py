@@ -3,6 +3,7 @@ The runner of lectioexporter.
 """
 from lectio import Session
 from lectio.utilities import lookup_values
+from lectio.types import AssignmentStatuses
 
 from operator import attrgetter
 
@@ -11,11 +12,13 @@ import todoist
 from .google_calendar import clear_calendar, create_event
 from .google_calendar import make_service
 
-from .credentials import get_google_credentials, get_todoist_credentials
+from .credentials import (get_google_credentials, get_todoist_credentials,
+                          get_lectio_credentials)
 
 from .config import CALENDAR_ID, SCHOOL_ID, STUDENT_ID, WEEKS_TO_CHECK
 from .config import LOOKUP_TEACHERS, LOOKUP_GROUPS
 from .config import GOOGLE_ENABLED, TODOIST_ENABLED
+from .config import PROJECT_ID, TIMEZONE
 
 from .utilities import get_current_year, get_current_week
 
@@ -85,7 +88,8 @@ def main_google(session):
     periods = []
     for i in range(WEEKS_TO_CHECK):
         periods.extend(session.get_periods(week + i, year,
-                                           student_id=STUDENT_ID))
+                                           student_id=STUDENT_ID,
+                                           tz=TIMEZONE))
 
     periods.sort(key=attrgetter("starttime"))
     clear_calendar(service, CALENDAR_ID, min_time=periods[0].starttime)
@@ -95,17 +99,43 @@ def main_google(session):
 
 
 def main_todoist(session):
-    credentials = get_todoist_credentials()
+    todoist_credentials = get_todoist_credentials()
+    lectio_credentials = get_lectio_credentials()
 
     service = todoist.TodoistAPI()
-    service.login(credentials["email"], credentials["password"])
+    service.login(todoist_credentials["email"],
+                  todoist_credentials["password"])
 
-    service.sync()
+    if not session.authenticated:
+        session.auth(lectio_credentials["username"],
+                     lectio_credentials["password"])
 
+    assignments = session.get_assignments()
+
+    service.sync(resource_types=["projects", "items"])
+
+    # clear all items
+    for item in service.items.all():
+        if item["project_id"] == PROJECT_ID:
+            item.delete()
+
+    service.commit()
+
+    for assignment in assignments:
+        if assignment.status == AssignmentStatuses.HANDED_IN:
+            continue
+
+        time = assignment.deadline.astimezone(TIMEZONE)
+        time_as_str = time.strftime("%d %B %Y %H:%M")
+
+        service.items.add(assignment.title, PROJECT_ID,
+                          date_string=time_as_str, date_lang="en")
+
+    service.commit()
 
 
 if __name__ == '__main__':
-    session = Session(SCHOOL_ID)
+    session = Session(SCHOOL_ID, tz=TIMEZONE)
 
     if GOOGLE_ENABLED:
         main_google(session)
