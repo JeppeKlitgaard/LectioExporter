@@ -6,10 +6,17 @@ from lectio.utilities import lookup_values
 
 from operator import attrgetter
 
+import todoist
+
 from .google_calendar import clear_calendar, create_event
-from .google_calendar import get_credentials, make_service
+from .google_calendar import make_service
+
+from .credentials import get_google_credentials, get_todoist_credentials
+
 from .config import CALENDAR_ID, SCHOOL_ID, STUDENT_ID, WEEKS_TO_CHECK
 from .config import LOOKUP_TEACHERS, LOOKUP_GROUPS
+from .config import GOOGLE_ENABLED, TODOIST_ENABLED
+
 from .utilities import get_current_year, get_current_week
 
 
@@ -67,8 +74,10 @@ def period_to_calendar(service, calendarId, period):
     return result
 
 
-if __name__ == '__main__':
-    session = Session(SCHOOL_ID)
+def main_google(session):
+    credentials = get_google_credentials()
+
+    service = make_service(credentials)
 
     year = get_current_year()
     week = get_current_week()
@@ -78,13 +87,28 @@ if __name__ == '__main__':
         periods.extend(session.get_periods(week + i, year,
                                            student_id=STUDENT_ID))
 
-    credentials = get_credentials()
-    service = make_service(credentials)
-
-    # Clear all elements, except those that are before the time of the earliest
-    # period.
     periods.sort(key=attrgetter("starttime"))
     clear_calendar(service, CALENDAR_ID, min_time=periods[0].starttime)
 
     for period in periods:
         period_to_calendar(service, CALENDAR_ID, period)
+
+
+def main_todoist(session):
+    credentials = get_todoist_credentials()
+
+    service = todoist.TodoistAPI()
+    service.login(credentials["email"], credentials["password"])
+
+    service.sync()
+
+
+
+if __name__ == '__main__':
+    session = Session(SCHOOL_ID)
+
+    if GOOGLE_ENABLED:
+        main_google(session)
+
+    if TODOIST_ENABLED:
+        main_todoist(session)

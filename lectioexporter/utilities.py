@@ -3,6 +3,7 @@ Contains utility functions and classes used by LectioExporter.
 """
 
 from datetime import datetime
+import os
 
 
 def dt2rfc3339(dt):
@@ -44,3 +45,11 @@ def get_current_year():
     Returns the current year.
     """
     return _get_cal()[0]
+
+
+def make_dir_if_non_existant(path):
+    """
+    If ``path`` does not exist, create it.
+    """
+    if not os.path.exists(path):
+        os.makedirs(path)

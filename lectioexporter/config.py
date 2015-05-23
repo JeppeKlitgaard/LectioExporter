@@ -3,14 +3,34 @@ Contains configuration options and values used by LectioExporter.
 """
 
 import re
+import os
+
 import logging
 
 LOGGING_LEVEL = logging.DEBUG
 
+CREDENTIALS_DIR = os.path.abspath(os.path.join(os.path.expanduser("~"),
+                                               ".credentials"))
+
+GOOGLE_ENABLED = False
+TODOIST_ENABLED = True
+
+# Google
+SCOPES = ("https://www.googleapis.com/auth/calendar",
+          "https://www.googleapis.com/auth/calendar.readonly",
+          "https://www.googleapis.com/auth/userinfo.email")
+
+CLIENT_SECRET_FILE = "client_secret.json"
+APPLICATION_NAME = "LectioExporter"
+
+CALENDAR_ID = "dapj.dk_oc1tppk1qrfglv9f2u6igpqetg@group.calendar.google.com"
+
+# Todoist
+
+# Lectio
 SCHOOL_ID = "248"
 STUDENT_ID = "9232029391"
 WEEKS_TO_CHECK = 3
-CALENDAR_ID = "dapj.dk_oc1tppk1qrfglv9f2u6igpqetg@group.calendar.google.com"
 
 LOOKUP_TEACHERS = {
     "BJ": "Bente",
