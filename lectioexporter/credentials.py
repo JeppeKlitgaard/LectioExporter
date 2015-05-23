@@ -16,6 +16,10 @@ from .utilities import make_dir_if_non_existant
 from .config import (APPLICATION_NAME, CREDENTIALS_DIR, CLIENT_SECRET_FILE,
                      SCOPES)
 
+import logging
+
+logger = logging.getLogger("LectioExporter")
+
 
 def get_google_credentials():
     """
@@ -27,6 +31,8 @@ def get_google_credentials():
     Returns:
         Credentials, the obtained credential.
     """
+    logger.debug("Fetching Google credentials.")
+
     parent_parsers = [tools.argparser]
     parser = argparse.ArgumentParser(
         description=APPLICATION_NAME,
@@ -43,6 +49,8 @@ def get_google_credentials():
     store = oa2c_file.Storage(credential_path)
     credentials = store.get()
     if not credentials or credentials.invalid:
+        logger.info("No valid Google credentials found, asking for new "
+                    "credentials.")
         flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
         flow.user_agent = APPLICATION_NAME
 
@@ -61,6 +69,7 @@ def _get_credentials(service_name, fields):
     """
     make_dir_if_non_existant(CREDENTIALS_DIR)
 
+    logger.debug("Fetching {} credentials".format(service_name.title()))
     credentials_path = os.path.join(CREDENTIALS_DIR,
                                     service_name.lower() + ".json")
 
@@ -71,6 +80,9 @@ def _get_credentials(service_name, fields):
             return credentials
 
     except FileNotFoundError:
+        logger.info("No valid {} credentials found, asking for new "
+                    "credentials.".format(service_name.title()))
+
         credentials = {}
 
         for field in fields:

@@ -22,6 +22,10 @@ from .config import PROJECT_ID, TIMEZONE
 
 from .utilities import get_current_year, get_current_week
 
+import logging
+
+logger = logging.getLogger("LectioExporter")
+
 
 def period_to_calendar(service, calendarId, period):
     """
@@ -87,6 +91,8 @@ def main_google(session):
 
     periods = []
     for i in range(WEEKS_TO_CHECK):
+        logger.info("Getting time table for week {}, {}".format(str(week + i),
+                                                                str(year)))
         periods.extend(session.get_periods(week + i, year,
                                            student_id=STUDENT_ID))
 
@@ -101,6 +107,7 @@ def main_todoist(session):
     todoist_credentials = get_todoist_credentials()
     lectio_credentials = get_lectio_credentials()
 
+    logger.info("Creating Todoist service.")
     service = todoist.TodoistAPI()
     service.login(todoist_credentials["email"],
                   todoist_credentials["password"])
@@ -109,15 +116,20 @@ def main_todoist(session):
         session.auth(lectio_credentials["username"],
                      lectio_credentials["password"])
 
+    logger.info("Getting Lectio assignments.")
     assignments = session.get_assignments()
 
     service.sync(resource_types=["projects", "items"])
 
     # clear all items
+    logger.info("Clearing assignments project on Todoist.")
     for item in service.items.all():
         if item["project_id"] == PROJECT_ID:
+            logger.info("Deleting item '{}'' with id: '{}'"
+                        .format(item["content"], item["id"]))
             item.delete()
 
+    logger.info("Commiting changes to Todoist.")
     service.commit()
 
     for assignment in assignments:
@@ -127,9 +139,12 @@ def main_todoist(session):
         time = assignment.deadline.astimezone(TIMEZONE)
         time_as_str = time.strftime("%d %B %Y %H:%M")
 
+        logger.info("Adding item '{}' to assignments project on Todoist, "
+                    "due: '{}'".format(assignment.title, time_as_str))
         service.items.add(assignment.title, PROJECT_ID,
                           date_string=time_as_str, date_lang="en")
 
+    logger.info("Commiting changes to Todoist.")
     service.commit()
 
 

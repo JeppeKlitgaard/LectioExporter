@@ -71,9 +71,8 @@ def clear_calendar(service, calendarId, max_results=2500, min_time=None):
             break
 
     for event in events:
-        fmt = "Deleted event with id: '{}', summary: '{}' starting: '{}'"
-        logger.info(fmt.format(event["id"], event["summary"],
-                               event["start"]["dateTime"]))
+        fmt = "Deleting event '{}' with id: '{}' on calendar with id: '{}'"
+        logger.info(fmt.format(event["summary"], event["id"], calendarId))
         service.events().delete(calendarId=calendarId,
                                 eventId=event["id"]).execute()
 
