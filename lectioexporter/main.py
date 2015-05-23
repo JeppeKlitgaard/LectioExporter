@@ -154,7 +154,10 @@ def main_todoist(session):
     service.commit()
 
 
-if __name__ == '__main__':
+def main():
+    """
+    Exports Lectio to Google Calendar and Todoist.
+    """
     session = Session(SCHOOL_ID, tz=TIMEZONE)
 
     if GOOGLE_ENABLED:
@@ -162,3 +165,7 @@ if __name__ == '__main__':
 
     if TODOIST_ENABLED:
         main_todoist(session)
+
+
+if __name__ == '__main__':
+    main()
