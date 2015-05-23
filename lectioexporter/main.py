@@ -88,8 +88,7 @@ def main_google(session):
     periods = []
     for i in range(WEEKS_TO_CHECK):
         periods.extend(session.get_periods(week + i, year,
-                                           student_id=STUDENT_ID,
-                                           tz=TIMEZONE))
+                                           student_id=STUDENT_ID))
 
     periods.sort(key=attrgetter("starttime"))
     clear_calendar(service, CALENDAR_ID, min_time=periods[0].starttime)
