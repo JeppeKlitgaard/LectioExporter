@@ -2,8 +2,6 @@
 Contains functions and classes used to interact with Google Calendar.
 """
 
-import os
-import argparse
 from datetime import datetime, timedelta
 import pytz
 

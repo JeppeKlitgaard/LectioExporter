@@ -82,6 +82,9 @@ def period_to_calendar(service, calendarId, period):
 
 
 def main_google(session):
+    """
+    Synchronizes the Lectio timetable with Google Calendar.
+    """
     credentials = get_google_credentials()
 
     service = make_service(credentials)
@@ -104,6 +107,9 @@ def main_google(session):
 
 
 def main_todoist(session):
+    """
+    Synchronizes the Lectio assignments with Todoist.
+    """
     todoist_credentials = get_todoist_credentials()
     lectio_credentials = get_lectio_credentials()
 
