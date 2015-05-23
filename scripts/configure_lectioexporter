@@ -14,4 +14,8 @@ cmd = spawn.find_executable("export_lectio")
 job = tab.new(command=cmd, comment=COMMENT_ID)
 job.hour.every(3)
 
+tab.write()
+
 print("Crontab set up.")
+print("Please run 'export_lectio' once manually "
+      "to ensure credentials are stored.")

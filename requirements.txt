@@ -2,3 +2,4 @@
 -e git://github.com/google/google-api-python-client#egg=googleapiclient
 todoist-python
 pytz
+python-crontab
