@@ -15,7 +15,7 @@ CREDENTIALS_DIR = os.path.abspath(os.path.join(os.path.expanduser("~"),
 
 TIMEZONE = pytz.timezone("Europe/Copenhagen")
 
-GOOGLE_ENABLED = False
+GOOGLE_ENABLED = True
 TODOIST_ENABLED = True
 
 # Google

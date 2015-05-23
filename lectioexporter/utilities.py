@@ -5,6 +5,10 @@ Contains utility functions and classes used by LectioExporter.
 from datetime import datetime
 import os
 
+import logging
+
+logger = logging.getLogger("LectioExporter")
+
 
 def dt2rfc3339(dt):
     """
@@ -52,4 +56,5 @@ def make_dir_if_non_existant(path):
     If ``path`` does not exist, create it.
     """
     if not os.path.exists(path):
+        logger.debug("Making directory: {}".format(path))
         os.makedirs(path)

@@ -23,6 +23,7 @@ def make_service(credentials):
     """
     Makes a ``service`` object based on ``credentials``.
     """
+    logger.info("Making Google service.")
     service = build("calendar", "v3", http=credentials.authorize(Http()))
 
     return service
@@ -41,6 +42,8 @@ def clear_calendar(service, calendarId, max_results=2500, min_time=None):
     """
     When ``min_time`` is ``None``, the ``min_time`` will be in one hour.
     """
+    logger.info("Clearing calendar: {}".format(calendarId))
+
     if min_time is None:
         min_time = datetime.utcnow() + timedelta(hours=1)
         min_time = min_time.replace(tzinfo=pytz.UTC)
@@ -94,6 +97,9 @@ def create_event(service, calendarId, summary, status, location, description,
             "dateTime": dt2rfc3339(end_time)
         }
     }
+
+    logger.info("Creating event '{}' on calendar with id: '{}'"
+                .format(fields["summary"], calendarId))
 
     event_result = service.events().insert(calendarId=calendarId,
                                            fields=",".join(fields.keys()),
