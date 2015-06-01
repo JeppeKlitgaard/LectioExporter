@@ -79,8 +79,6 @@ def period_to_calendar(service, calendarId, period):
     starttime = period.starttime
     endtime = period.endtime
 
-    print(period.id, description)
-
     result = create_event(service, calendarId, summary, status, location,
                           description, starttime, endtime)
 
