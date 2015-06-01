@@ -12,7 +12,7 @@ tab.remove_all(comment=COMMENT_ID)  # Clean old configs
 cmd = spawn.find_executable("export_lectio")
 
 job = tab.new(command=cmd, comment=COMMENT_ID)
-job.hour.every(3)
+job.every(10).minutes()
 
 tab.write()
 
