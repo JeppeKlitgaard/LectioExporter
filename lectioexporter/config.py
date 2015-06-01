@@ -18,6 +18,10 @@ TIMEZONE = pytz.timezone("Europe/Copenhagen")
 GOOGLE_ENABLED = True
 TODOIST_ENABLED = True
 
+# Database
+DATABASE_LOCATION = os.path.join(CONFIG_DIR, "lectioexporter.db")
+PERIODS_TABLE_NAME = "tblPeriods"
+
 # Google
 SCOPES = ("https://www.googleapis.com/auth/calendar",
           "https://www.googleapis.com/auth/calendar.readonly",

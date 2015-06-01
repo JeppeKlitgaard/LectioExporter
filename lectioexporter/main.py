@@ -15,6 +15,8 @@ from .google_calendar import make_service
 from .credentials import (get_google_credentials, get_todoist_credentials,
                           get_lectio_credentials)
 
+from .database import Database
+
 from .config import CALENDAR_ID, SCHOOL_ID, STUDENT_ID, WEEKS_TO_CHECK
 from .config import LOOKUP_TEACHERS, LOOKUP_GROUPS
 from .config import GOOGLE_ENABLED, TODOIST_ENABLED
@@ -69,11 +71,15 @@ def period_to_calendar(service, calendarId, period):
     if period.note:
         desc_items.append("Note:\n" + period.note)
 
+    desc_items.append("Id: " + period.id)
+
     description = "\n \n".join(desc_items)
 
     # Start time and end time
     starttime = period.starttime
     endtime = period.endtime
+
+    print(period.id, description)
 
     result = create_event(service, calendarId, summary, status, location,
                           description, starttime, endtime)
@@ -81,7 +87,7 @@ def period_to_calendar(service, calendarId, period):
     return result
 
 
-def main_google(session):
+def main_google(session, database):
     """
     Synchronizes the Lectio timetable with Google Calendar.
     """
@@ -100,9 +106,22 @@ def main_google(session):
                                            student_id=STUDENT_ID))
 
     periods.sort(key=attrgetter("starttime"))
-    clear_calendar(service, CALENDAR_ID, min_time=periods[0].starttime)
+    min_time = periods[0].starttime
+
+    ids_to_keep = []
+    periods_to_commit = []
 
     for period in periods:
+        if database.get(period.id) != period.get_hash():
+                periods_to_commit.append(period)
+        else:
+            ids_to_keep.append(period.id)
+
+    clear_calendar(service, CALENDAR_ID, except_ids=ids_to_keep,
+                   min_time=min_time)
+
+    for period in periods_to_commit:
+        database[period.id] = period.get_hash()
         period_to_calendar(service, CALENDAR_ID, period)
 
 
@@ -160,8 +179,11 @@ def main():
     """
     session = Session(SCHOOL_ID, tz=TIMEZONE)
 
+    database = Database()
+    database.connect()
+
     if GOOGLE_ENABLED:
-        main_google(session)
+        main_google(session, database)
 
     if TODOIST_ENABLED:
         main_todoist(session)

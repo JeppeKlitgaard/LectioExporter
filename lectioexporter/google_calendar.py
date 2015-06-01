@@ -11,6 +11,8 @@ from httplib2 import Http
 
 import logging
 
+import re
+
 from .utilities import dt2rfc3339
 
 
@@ -36,15 +38,26 @@ def list_calendars(service):
     return result
 
 
-def clear_calendar(service, calendarId, max_results=2500, min_time=None):
+def _get_period_id_from_event(event):
+    pattern = re.compile("^Id: (\w+)$", re.MULTILINE)
+
+    try:
+        description = event["description"]
+    except KeyError:
+        return None
+
+    matches = pattern.search(description)
+
+    if matches:
+        return matches.group(1)
+
+
+def clear_calendar(service, calendarId, max_results=2500, min_time=None,
+                   except_ids=[]):
     """
     When ``min_time`` is ``None``, the ``min_time`` will be in one hour.
     """
     logger.info("Clearing calendar: {}".format(calendarId))
-
-    if min_time is None:
-        min_time = datetime.utcnow() + timedelta(hours=1)
-        min_time = min_time.replace(tzinfo=pytz.UTC)
 
     events = []
     next_page_token = ""
@@ -52,10 +65,13 @@ def clear_calendar(service, calendarId, max_results=2500, min_time=None):
         kwargs = {
             "calendarId": calendarId,
             "maxResults": max_results,
-            "timeMin": dt2rfc3339(min_time),
             "singleEvents": "true",
             "orderBy": "startTime"
         }
+
+        if min_time is not None:
+            kwargs["timeMin"] = dt2rfc3339(min_time)
+
         if next_page_token:
             kwargs["pageToken"] = next_page_token
 
@@ -69,6 +85,11 @@ def clear_calendar(service, calendarId, max_results=2500, min_time=None):
             break
 
     for event in events:
+        period_id = _get_period_id_from_event(event)
+
+        if period_id in except_ids:
+            continue
+
         fmt = "Deleting event '{}' with id: '{}' on calendar with id: '{}'"
         logger.info(fmt.format(event["summary"], event["id"], calendarId))
         service.events().delete(calendarId=calendarId,
