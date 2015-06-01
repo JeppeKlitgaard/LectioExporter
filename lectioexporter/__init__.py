@@ -2,7 +2,7 @@
 Exports your lectio timetable to a Google Calendar and your
 lectio assignments to Todoist.
 """
-__version__ = (0, 2, 0)
+__version__ = (0, 2, 1)
 
 import logging
 from .config import LOGGING_LEVEL
