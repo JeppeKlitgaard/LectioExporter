@@ -16,11 +16,10 @@ CONFIG_DIR = os.path.abspath(os.path.join(os.path.expanduser("~"),
 TIMEZONE = pytz.timezone("Europe/Copenhagen")
 
 GOOGLE_ENABLED = True
-TODOIST_ENABLED = True
+EVERNOTE_ENABLED = False
 
 # Database
-DATABASE_LOCATION = os.path.join(CONFIG_DIR, "lectioexporter.db")
-PERIODS_TABLE_NAME = "tblPeriods"
+DATABASE_LOCATION = os.path.join(CONFIG_DIR, "lectioexporter_db.json")
 
 # Google
 SCOPES = ("https://www.googleapis.com/auth/calendar",
@@ -32,8 +31,11 @@ APPLICATION_NAME = "LectioExporter"
 
 CALENDAR_ID = "dapj.dk_oc1tppk1qrfglv9f2u6igpqetg@group.calendar.google.com"
 
-# Todoist
-PROJECT_ID = 144366012
+# Evernote
+EVERNOTE_DEV_TOKEN_FILE = os.path.join(CONFIG_DIR, "evernote_dev.token")
+EVERNOTE_NOTEBOOK_GUID = "8ae69883-89dd-4d04-a7c3-4c866a27e7b6"
+EVERNOTE_ASSIGNMENT_PREFIX = "SG Opgave: "
+EVERNOTE_HOMEWORK_PREFIX = "SG Lektie: "
 
 # Lectio
 SCHOOL_ID = "248"
@@ -42,14 +44,15 @@ WEEKS_TO_CHECK = 6
 
 LOOKUP_TEACHERS = {
     "BJ": "Bente",
-    "JDM": "Jakúp",
     "JLI": "Jens",
     "FG": "Flemming",
     "JE": "Klaus",
-    "LI": "Morten",
-    "TVL": "Teresa",
     "LST": "Lea",
-    "LK": "Louise"
+    "LK": "Louise",
+    "LJN": "Louise",
+    "MS": "Maja",
+    "MG": "Mette",
+    "MOE": "Michael",
 }
 
 LOOKUP_GROUPS = {

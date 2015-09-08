@@ -1,43 +1,26 @@
-import sqlite3
+import json
 
-from .config import DATABASE_LOCATION, PERIODS_TABLE_NAME
+from .config import DATABASE_LOCATION
 
 
 class Database(object):
     def __init__(self):
-        self.connection = None
-        self.cursor = None
+        self.filepath = DATABASE_LOCATION
+        self.data = dict()
 
-    def assert_connected(self):
-        """
-        Ensures the database is connected.
-        """
-        assert(self.connection is not None)
+    def load(self, safe=True):
+        try:
+            with open(self.filepath, "r") as f:
+                self.data = json.load(f)
+        except FileNotFoundError as e:
+            if safe:
+                print("Failed to load DB.")
+            else:
+                raise e
 
-    def connect(self):
-        """
-        Connects to the SQLite3 database.
-        """
-        self.connection = sqlite3.connect(DATABASE_LOCATION)
-        self.cursor = self.connection.cursor()
-
-        self._create_periods_if_not_exists()
-
-        return True
-
-    def _create_periods_if_not_exists(self):
-        self.assert_connected()
-
-        sql = """
-        CREATE TABLE IF NOT EXISTS {} (
-            id INTEGER primary key autoincrement not null,
-            PeriodID TEXT unique,
-            PeriodHash TEXT);
-        """
-        sql = sql.format(PERIODS_TABLE_NAME)
-        self.cursor.executescript(sql)
-
-        self.connection.commit()
+    def save(self):
+        with open(self.filepath, "w") as f:
+            json.dump(self.data, f)
 
     def get(self, key, default=None):
         try:
@@ -46,55 +29,16 @@ class Database(object):
             return default
 
     def __len__(self):
-        self.assert_connected()
-
-        sql = "SELECT count(*) FROM {}".format(PERIODS_TABLE_NAME)
-        self.cursor.execute(sql)
-
-        result = self.cursor.fetchone()
-
-        return result[0]
+        return len(self.data)
 
     def __getitem__(self, key):
-        self.assert_connected()
-
-        sql = "SELECT PeriodHash from {} WHERE PeriodID=(?)"
-        sql = sql.format(PERIODS_TABLE_NAME)
-
-        self.cursor.execute(sql, (key,))
-
-        result = self.cursor.fetchall()
-
-        if not result:
-            raise KeyError("Key not found.")
-
-        return result[0][0]
+        return self.data[key]
 
     def __setitem__(self, key, value):
-        self.assert_connected()
-
-        sql = "INSERT INTO {} (PeriodID, PeriodHash) VALUES (?, ?)"
-        sql = sql.format(PERIODS_TABLE_NAME)
-
-        self.cursor.execute(sql, (key, value))
-
-        self.connection.commit()
+        self.data[key] = value
 
     def __delitem__(self, key):
-        self.assert_connected()
-
-        sql = "DELETE FROM {} WHERE PeriodID=(?)"
-        sql = sql.format(PERIODS_TABLE_NAME)
-
-        self.cursor.execute(sql, (key,))
-
-        self.connection.commit()
+        del self.data[key]
 
     def __contains__(self, item):
-        self.assert_connected()
-
-        try:
-            self[item]
-        except KeyError:
-            return False
-        return True
+        return item in self.data

@@ -104,14 +104,6 @@ def _get_credentials(service_name, fields):
         return credentials
 
 
-def get_todoist_credentials():
-    """
-    Gets username and password for Todoist if available,
-    otherwise asks the user to input them.
-    """
-    return _get_credentials("todoist", ["email", "password"])
-
-
 def get_lectio_credentials():
     """
     Gets username and password for Lectio if available,
