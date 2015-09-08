@@ -1,5 +1,6 @@
 -e git://github.com/dkkline/pylectio.git#egg=lectio
 -e git://github.com/google/google-api-python-client#egg=googleapiclient
+-e git://github.com/evernote/evernote-sdk-python3#egg=evernote
 todoist-python
 pytz
 python-crontab
